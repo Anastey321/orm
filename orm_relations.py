@@ -46,7 +46,13 @@ open_session = session()
 boban = Human(name="Boban", age=21)
 boban.hobbies = [ Hobby(name="drinking")]
 
-open_session.add(boban)
+open_session.add_all(
+                        [
+                                Human(name="someone", age=17, hobbies= [Hobby(name="h1"), Hobby(name="h2")] ) ,
+
+                                Human(name="someone2", age=18, hobbies= [Hobby(name="h3"), Hobby(name="h4")] )
+                        ]
+                    )
 open_session.commit()
 
 
