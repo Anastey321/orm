@@ -3,7 +3,7 @@
 #  update shops set shop_name="updated"  where shop_id==114
 
 
-from sqlalchemy import create_engine, String, bindparam, Integer, and_, or_, select, Table, MetaData, Column, asc, desc
+from sqlalchemy import create_engine, String, bindparam, Integer, and_, or_, select, Table, MetaData, Column, asc, desc, between
 from sqlalchemy import text #prepared query
 
 engine = create_engine("mysql+pymysql://elko:elko@10.10.64.201/elko", echo=True)
@@ -11,7 +11,7 @@ engine = create_engine("mysql+pymysql://elko:elko@10.10.64.201/elko", echo=True)
 connection = engine.connect()
 
 """
-    select cust_name 
+select cust_name 
     from customers 
     where 
         (
@@ -20,7 +20,7 @@ connection = engine.connect()
             trim(cust_country) = 'USA'
         )   
         or 
-        trim(cust_country) = 'Germany'
+        trim(cust_country) between  'Austria' and 'Zeland'
     order by   cust_name desc  
 
 """
@@ -45,10 +45,13 @@ print(
 prepared_query = select([customers.c.cust_name]).where(
                                                         or_(
                                                                 and_(customers.c.cust_contact == 'John Smith',   customers.c.cust_country=='USA' ),
-                                                                customers.c.cust_country=='Germany'
+                                                                between(customers.c.cust_country,'Austria','Zeland')
                                                            )
                                                      ).order_by(desc(customers.c.cust_name))
 
 cursor = connection.execute(prepared_query)
 print(cursor.fetchall())
+
+
+# price between 8 - 11
 
