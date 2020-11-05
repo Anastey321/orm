@@ -1,10 +1,9 @@
-from sqlalchemy import create_engine, Column, String, Integer
+from sqlalchemy import create_engine, Column, String, Integer, and_
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine("mysql+pymysql://elko:elko@10.10.64.201/elko", echo=True)
+engine = create_engine("mysql+pymysql://elko:elko@10.10.64.201/elko", echo=False)
 Base = declarative_base()
-
 
 class Human(Base):
     __tablename__ = "humans"
@@ -17,7 +16,6 @@ class Human(Base):
     age = Column(Integer)
     def getName(self):
         return "Dear, "+self.name
-
     def nextYearAge(self):
         return 1+self.age
 
@@ -41,6 +39,37 @@ human2 = open_session.query(Human).get(2)
 print(human2.name)
 
 
-# open_session.query(Human).all()  = select ...from Human
-# open_session.query(Human).update()  = update ...from Human
+
+# open_session.query(Human) !!! commit  = update ...from Human
+boba = open_session.query(Human).get(2)
+boba.age = boba.nextYearAge()
+
+open_session.commit()
+
+for human in open_session.query(Human).all():
+    human.age = human.nextYearAge()
+
+
+open_session.commit()
+
 # open_session.query(Human).delete()  = delete ...from Human
+
+# delete by object
+boba = open_session.query(Human).get(3)
+if boba:
+    open_session.delete(boba)
+    open_session.commit()
+
+    print(boba.nextYearAge())
+
+# delete all()
+open_session.query(Human).delete()
+
+
+# delete by filter
+open_session.query(Human).filter(and_(Human.age>20, Human.age<15)).delete()
+
+# filter
+humans = open_session.query(Human).filter(and_(Human.age>20, Human.age<15))
+for human in humans:
+    print(human.name)
