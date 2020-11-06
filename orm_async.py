@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, String, Integer, and_, ForeignKey
+from sqlalchemy import create_engine, Column, String, Integer, and_, ForeignKey,select
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 import asyncio
@@ -51,5 +51,32 @@ async def create_tables():
             # await session.commit()
 
 
+
+async def select_Humans():
+    engine = create_async_engine("mysql+pymysql://elko:elko@10.10.64.201/elko", echo=False)
+
+    async with AsyncSession(engine) as session:
+        async with session.begin():
+            humans = await session.execute(select(Human))
+            for human in humans:
+                print(human)
+
+
+async def select_Hobby():
+    engine = create_async_engine("mysql+pymysql://elko:elko@10.10.64.201/elko", echo=False)
+
+    async with AsyncSession(engine) as session:
+        async with session.begin():
+            hobbies = await session.execute(select(Hobby))
+            for hobby in hobbies:
+                print(hobby)
+
+
+# drop create table
 loop = asyncio.get_event_loop()
-result = loop.run_until_complete(create_tables())
+loop.run_until_complete(create_tables())
+
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete( asyncio.wait([  select_Humans(), select_Hobby() ]) )
+print('Finish')
