@@ -1,15 +1,16 @@
 from sqlalchemy import create_engine, Column, String, Integer, and_, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-import  asyncio
+import asyncio
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 
-engine = create_engine("mysql+pymysql://elko:elko@10.10.64.201/elko", echo=False)
+
 Base = declarative_base()
 
 class Human(Base):
     __tablename__ = "humans"
-    id = Column("human_id", Integer, primary_key=True)
+    id = Column( "human_id", Integer, primary_key=True)
     name = Column(String(10))
     age = Column(Integer)
 
@@ -31,30 +32,24 @@ class Hobby(Base):
 
 
 
-session = sessionmaker(engine)
-open_session = session()
+async def create_tables():
+    engine = create_async_engine("mysql+pymysql://elko:elko@10.10.64.201/elko", echo=False)
+
+    async  with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.drop_all)
+        await connection.run_sync(Base.metadata.create_all)
 
 
-boban = Human(name="Boban", age=21)
-boban.hobbies = [ Hobby(name="drinking")]
 
-open_session.add_all(
-                        [
-                                Human(name="someone", age=17, hobbies= [Hobby(name="h1"), Hobby(name="h2")] ) ,
+    async with AsyncSession(engine) as session:
+        async with session.begin():
 
-                                Human(name="someone2", age=18, hobbies= [Hobby(name="h3"), Hobby(name="h4")] )
-                        ]
-                    )
-open_session.commit()
+            human = Human(name="Human", age= 0)
+            human.hobbies = [ Hobby(name="thinking")]
+            session.add(human)
+
+            # await session.commit()
 
 
-bob = open_session.query(Human).get(9)
-print(bob.name)
-for hobby in bob.hobbies:
-    print(hobby.name)
-
-hobbies = open_session.query(Hobby).filter(Hobby.name=='drinking')
-if hobbies:
-    for hobby in hobbies:
-        print(hobby.human.name)
-
+loop = asyncio.get_event_loop()
+result = loop.run_until_complete(create_tables())

@@ -48,7 +48,7 @@ for human, hobby in result1:
 
 # VS
 
-result2 = open_session.query(Human).join(Hobby).all()
+result2 = open_session.query(Human).join(Hobby).filter(Human.name.like("Bob")).all()
 for human in result2:
     print(human.name)
     for hobby in human.hobbies:
