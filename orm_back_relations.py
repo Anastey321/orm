@@ -48,5 +48,13 @@ hobby2.human  = human
 
 session = sessionmaker(engine)
 open_session = session()
+
+
+
+bob = open_session.query(Human).filter(Human.name=='Bob').first()
+if bob:
+    for hobby in bob.hobbies:
+        open_session.delete(hobby)
+
 open_session.add( human )
 open_session.commit()
